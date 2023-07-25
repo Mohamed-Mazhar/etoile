@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "301832044515",
+    "project_id": "etoile-app-c9e4a",
+    "storage_bucket": "etoile-app-c9e4a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:301832044515:android:997653d04aa2bcd91eead6",
+        "android_client_info": {
+          "package_name": "com.etoile.flutter_app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "301832044515-56hfhrlqrm1mfkpjhamh66m7pondlc12.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCWMzEj392UYVaXhxl2_3NRfTiB6MWiSp0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "301832044515-56hfhrlqrm1mfkpjhamh66m7pondlc12.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
