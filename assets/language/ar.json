@@ -459,7 +459,6 @@
   "did_not_receive_the_code": "لم يصلك الرمز؟",
   "for_demo_purpose_use": "لغرض العرض ، استخدم 1234 كـ OTP",
   "all_our_branches": "جميع فروعنا مغلقة الآن",
-  "resend_code_successful": "Resent code successful"
-
-
+  "resend_code_successful": "Resent code successful",
+  "unknown_error": "خطأ غير معروف"
 }

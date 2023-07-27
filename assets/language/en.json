@@ -458,5 +458,6 @@
   "did_not_receive_the_code": "Did not receive the code ?",
   "for_demo_purpose_use": "For demo purpose use 1234 as OTP",
   "all_our_branches": "All  our branches are closed for now",
-  "resend_code_successful": "Resent code successful"
+  "resend_code_successful": "Resent code successful",
+  "unknown_error": "Unknown error"
 }

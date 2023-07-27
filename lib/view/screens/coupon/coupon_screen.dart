@@ -23,7 +23,9 @@ class CouponScreen extends StatefulWidget {
   @override
   State<CouponScreen> createState() => _CouponScreenState();
 }
+
 late bool _isLoggedIn;
+
 class _CouponScreenState extends State<CouponScreen> {
   @override
   void initState() {

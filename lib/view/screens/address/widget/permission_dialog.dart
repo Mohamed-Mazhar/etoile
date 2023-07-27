@@ -19,21 +19,22 @@ class PermissionDialog extends StatelessWidget {
         child: SizedBox(
           width: 300,
           child: Column(mainAxisSize: MainAxisSize.min, children: [
-
             Icon(Icons.add_location_alt_rounded, color: Theme.of(context).primaryColor, size: 100),
             const SizedBox(height: Dimensions.paddingSizeLarge),
-
             Text(
-              getTranslated('you_denied_location_permission', context)!, textAlign: TextAlign.justify,
+              getTranslated('you_denied_location_permission', context)!,
+              textAlign: TextAlign.justify,
               style: rubikMedium.copyWith(fontSize: Dimensions.fontSizeLarge),
             ),
             const SizedBox(height: Dimensions.paddingSizeLarge),
-
             Row(children: [
               Expanded(
                 child: TextButton(
                   style: TextButton.styleFrom(
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10), side: BorderSide(width: 2, color: Theme.of(context).primaryColor)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                      side: BorderSide(width: 2, color: Theme.of(context).primaryColor),
+                    ),
                     minimumSize: const Size(1, 50),
                   ),
                   child: Text(getTranslated('no', context)!),
@@ -41,14 +42,16 @@ class PermissionDialog extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: Dimensions.paddingSizeSmall),
-              Expanded(child: CustomButton(btnTxt: getTranslated('yes', context), onTap: () async {
-                if(ResponsiveHelper.isMobilePhone()) {
-                  await Geolocator.openAppSettings();
-                }
-                Navigator.pop(Get.context!);
-              })),
+              Expanded(
+                  child: CustomButton(
+                      btnTxt: getTranslated('yes', context),
+                      onTap: () async {
+                        if (ResponsiveHelper.isMobilePhone()) {
+                          await Geolocator.openAppSettings();
+                        }
+                        Navigator.pop(Get.context!);
+                      })),
             ]),
-
           ]),
         ),
       ),

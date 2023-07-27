@@ -31,7 +31,8 @@ class CustomTextField extends StatefulWidget {
   final InputDecoration? inputDecoration;
 
   const CustomTextField(
-      {Key? key, this.hintText = 'Write something...',
+      {Key? key,
+      this.hintText = 'Write something...',
       this.controller,
       this.focusNode,
       this.nextFocus,
@@ -55,8 +56,8 @@ class CustomTextField extends StatefulWidget {
       this.prefixIconUrl,
       this.isSearch = false,
       this.languageProvider,
-        this.inputDecoration
-      }) : super(key: key);
+      this.inputDecoration})
+      : super(key: key);
 
   @override
   State<CustomTextField> createState() => _CustomTextFieldState();
@@ -71,7 +72,10 @@ class _CustomTextFieldState extends State<CustomTextField> {
       maxLines: widget.maxLines,
       controller: widget.controller,
       focusNode: widget.focusNode,
-      style: Theme.of(context).textTheme.displayMedium!.copyWith(color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeLarge),
+      style: Theme.of(context)
+          .textTheme
+          .displayMedium!
+          .copyWith(color: Theme.of(context).textTheme.bodyLarge!.color, fontSize: Dimensions.fontSizeLarge),
       textInputAction: widget.inputAction,
       keyboardType: widget.inputType,
       cursorColor: Theme.of(context).primaryColor,
@@ -80,44 +84,55 @@ class _CustomTextFieldState extends State<CustomTextField> {
       autofocus: false,
       //onChanged: widget.isSearch ? widget.languageProvider.searchLanguage : null,
       obscureText: widget.isPassword ? _obscureText : false,
-      inputFormatters: widget.inputType == TextInputType.phone ? <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp('[0-9+]'))] : null,
-      decoration: widget.inputDecoration ?? InputDecoration(
-        contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10.0),
-          borderSide: const BorderSide(style: BorderStyle.none, width: 0),
-        ),
-        isDense: true,
-        hintText: widget.hintText,
-        fillColor: widget.fillColor ?? Theme.of(context).cardColor,
-        hintStyle: Theme.of(context).textTheme.displayMedium!.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor.withOpacity(0.7)),
-        filled: true,
-        prefixIcon: widget.isShowPrefixIcon ? Padding(
-          padding: const EdgeInsets.only(left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeSmall),
-          child: Image.asset(widget.prefixIconUrl!),
-        ) : const SizedBox.shrink(),
-        prefixIconConstraints: const BoxConstraints(minWidth: 23, maxHeight: 20),
-        suffixIcon: widget.isShowSuffixIcon
-            ? widget.isPassword
-                ? IconButton(
-                    icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility, color: Theme.of(context).hintColor.withOpacity(0.3)),
-                    onPressed: _toggle)
-                : widget.isIcon
+      inputFormatters: widget.inputType == TextInputType.phone
+          ? <TextInputFormatter>[FilteringTextInputFormatter.allow(RegExp('[0-9+]'))]
+          : null,
+      decoration: widget.inputDecoration ??
+          InputDecoration(
+            contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 22),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(10.0),
+              borderSide: const BorderSide(style: BorderStyle.none, width: 0),
+            ),
+            isDense: true,
+            hintText: widget.hintText,
+            fillColor: widget.fillColor ?? Theme.of(context).cardColor,
+            hintStyle: Theme.of(context).textTheme.displayMedium!.copyWith(
+                fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).hintColor.withOpacity(0.7)),
+            filled: true,
+            prefixIcon: widget.isShowPrefixIcon
+                ? Padding(
+                    padding: const EdgeInsets.only(
+                        left: Dimensions.paddingSizeLarge, right: Dimensions.paddingSizeSmall),
+                    child: Image.asset(widget.prefixIconUrl!),
+                  )
+                : const SizedBox.shrink(),
+            prefixIconConstraints: const BoxConstraints(minWidth: 23, maxHeight: 20),
+            suffixIcon: widget.isShowSuffixIcon
+                ? widget.isPassword
                     ? IconButton(
-                        onPressed: widget.onSuffixTap as void Function()?,
-                        icon: Image.asset(
-                          widget.suffixIconUrl!,
-                          width: 15,
-                          height: 15,
-                          color: Theme.of(context).textTheme.bodyLarge!.color,
-                        ),
-                      )
-                    : null
-            : null,
-      ),
+                        icon: Icon(_obscureText ? Icons.visibility_off : Icons.visibility,
+                            color: Theme.of(context).hintColor.withOpacity(0.3)),
+                        onPressed: _toggle)
+                    : widget.isIcon
+                        ? IconButton(
+                            onPressed: widget.onSuffixTap as void Function()?,
+                            icon: Image.asset(
+                              widget.suffixIconUrl!,
+                              width: 15,
+                              height: 15,
+                              color: Theme.of(context).textTheme.bodyLarge!.color,
+                            ),
+                          )
+                        : null
+                : null,
+          ),
       onTap: widget.onTap as void Function()?,
-      onSubmitted: (text) => widget.nextFocus != null ? FocusScope.of(context).requestFocus(widget.nextFocus)
-          : widget.onSubmit != null ? widget.onSubmit!(text) : null,
+      onSubmitted: (text) => widget.nextFocus != null
+          ? FocusScope.of(context).requestFocus(widget.nextFocus)
+          : widget.onSubmit != null
+              ? widget.onSubmit!(text)
+              : null,
       onChanged: widget.onChanged as void Function(String)?,
     );
   }

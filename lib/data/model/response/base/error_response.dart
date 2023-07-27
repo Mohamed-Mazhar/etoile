@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+
 /// errors : [{"code":"l_name","message":"The last name field is required."},{"code":"password","message":"The password field is required."}]
 
 class ErrorResponse {
@@ -11,7 +13,7 @@ class ErrorResponse {
   }
 
   ErrorResponse.fromJson(dynamic json) {
-    if (json["errors"] != null) {
+    if ( json != null && json["errors"] != null) {
       _errors = [];
       json["errors"].forEach((v) {
         _errors!.add(Errors.fromJson(v));

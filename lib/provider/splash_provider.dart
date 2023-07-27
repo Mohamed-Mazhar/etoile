@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_restaurant/data/model/response/base/api_response.dart';
@@ -8,6 +10,7 @@ import 'package:flutter_restaurant/main.dart';
 import 'package:flutter_restaurant/provider/auth_provider.dart';
 import 'package:flutter_restaurant/utill/app_constants.dart';
 import 'package:flutter_restaurant/view/base/custom_snackbar.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:provider/provider.dart';
 
 import '../data/model/response/policy_model.dart';
@@ -24,32 +27,32 @@ class SplashProvider extends ChangeNotifier {
   PolicyModel? _policyModel;
   bool _cookiesShow = true;
 
-
-
   ConfigModel? get configModel => _configModel;
+
   BaseUrls? get baseUrls => _baseUrls;
+
   DateTime get currentTime => _currentTime;
+
   PolicyModel? get policyModel => _policyModel;
+
   bool get cookiesShow => _cookiesShow;
-  
 
   Future<bool> initConfig() async {
     ApiResponse apiResponse = await splashRepo!.getConfig();
     bool isSuccess;
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _configModel = ConfigModel.fromJson(apiResponse.response!.data);
+      debugPrint("Configuration retrieved ${_configModel?.branches}");
       _baseUrls = ConfigModel.fromJson(apiResponse.response!.data).baseUrls;
       isSuccess = true;
 
-      if(!kIsWeb) {
-        if(!Provider.of<AuthProvider>(Get.context!, listen: false).isLoggedIn()){
+      if (!kIsWeb) {
+        if (!Provider.of<AuthProvider>(Get.context!, listen: false).isLoggedIn()) {
           await Provider.of<AuthProvider>(Get.context!, listen: false).updateToken();
         }
       }
 
-
-
-      if(_configModel != null && _configModel!.branches != null && !isBranchSelectDisable()){
+      if (_configModel != null && _configModel!.branches != null && !isBranchSelectDisable()) {
         await splashRepo?.setBranchId(_configModel!.branches![0]!.id!);
       }
       notifyListeners();
@@ -71,15 +74,15 @@ class SplashProvider extends ChangeNotifier {
 
   bool isRestaurantClosed(bool today) {
     DateTime date = DateTime.now();
-    if(!today) {
+    if (!today) {
       date = date.add(const Duration(days: 1));
     }
     int weekday = date.weekday;
-    if(weekday == 7) {
+    if (weekday == 7) {
       weekday = 0;
     }
-    for(int index = 0; index <  _configModel!.restaurantScheduleTime!.length; index++) {
-      if(weekday.toString() ==  _configModel!.restaurantScheduleTime![index].day) {
+    for (int index = 0; index < _configModel!.restaurantScheduleTime!.length; index++) {
+      if (weekday.toString() == _configModel!.restaurantScheduleTime![index].day) {
         return false;
       }
     }
@@ -87,15 +90,16 @@ class SplashProvider extends ChangeNotifier {
   }
 
   bool isRestaurantOpenNow(BuildContext context) {
-    if(isRestaurantClosed(true)) {
+    if (isRestaurantClosed(true)) {
       return false;
     }
     int weekday = DateTime.now().weekday;
-    if(weekday == 7) {
+    if (weekday == 7) {
       weekday = 0;
     }
-    for(int index = 0; index <  _configModel!.restaurantScheduleTime!.length; index++) {
-      if(weekday.toString() ==  _configModel!.restaurantScheduleTime![index].day && DateConverter.isAvailable(
+    for (int index = 0; index < _configModel!.restaurantScheduleTime!.length; index++) {
+      if (weekday.toString() == _configModel!.restaurantScheduleTime![index].day &&
+          DateConverter.isAvailable(
             _configModel!.restaurantScheduleTime![index].openingTime!,
             _configModel!.restaurantScheduleTime![index].closingTime!,
             context,
@@ -123,31 +127,78 @@ class SplashProvider extends ChangeNotifier {
   }
 
   void cookiesStatusChange(String? data) {
-    if(data != null){
+    if (data != null) {
       splashRepo!.sharedPreferences!.setString(AppConstants.cookiesManagement, data);
     }
     _cookiesShow = false;
     notifyListeners();
   }
 
-  bool getAcceptCookiesStatus(String? data) => splashRepo!.sharedPreferences!.getString(AppConstants.cookiesManagement) != null
-      && splashRepo!.sharedPreferences!.getString(AppConstants.cookiesManagement) == data;
+  bool getAcceptCookiesStatus(String? data) =>
+      splashRepo!.sharedPreferences!.getString(AppConstants.cookiesManagement) != null &&
+      splashRepo!.sharedPreferences!.getString(AppConstants.cookiesManagement) == data;
 
-  int getActiveBranch(){
+  int getActiveBranch() {
     int branchActiveCount = 0;
-    for(int i = 0; i < _configModel!.branches!.length; i++){
-      if(_configModel!.branches![i]!.status ?? false) {
+    for (int i = 0; i < _configModel!.branches!.length; i++) {
+      if (_configModel!.branches![i]!.status ?? false) {
         branchActiveCount++;
-        if(branchActiveCount > 1){
+        if (branchActiveCount > 1) {
           break;
         }
       }
     }
-    if(branchActiveCount == 0){
-       splashRepo?.setBranchId(-1);
+    if (branchActiveCount == 0) {
+      splashRepo?.setBranchId(-1);
     }
     return branchActiveCount;
   }
 
-  bool isBranchSelectDisable()=> getActiveBranch() != 1;
+  bool isBranchSelectDisable() => getActiveBranch() != 1;
+
+  Future<void> setDefaultBranch({required List<Branches?>? branches}) async {
+    if (branches != null) {
+      final defaultBranch = branches.first;
+      if (defaultBranch != null) {
+        splashRepo?.setBranchId(defaultBranch.id!);
+        notifyListeners();
+      }
+    }
+  }
+
+  Future<void> setUserNearestBranch({
+    required List<Branches?> branches,
+    required Position currentUserLocation,
+  }) async {
+    var shortestDistance = double.maxFinite;
+    var nearestBranchId = 0;
+    for (final branch in branches) {
+      if (branch != null) {
+        double distance = _calculateDistanceWithBranch(
+          lat1: double.parse(branch.latitude!),
+          lon1: double.parse(branch.longitude!),
+          lat2: currentUserLocation.latitude,
+          lon2: currentUserLocation.longitude,
+        );
+        if (distance < shortestDistance) {
+          shortestDistance = distance;
+          nearestBranchId = branch.id!;
+        }
+      }
+    }
+    await splashRepo!.setBranchId(nearestBranchId);
+    notifyListeners();
+  }
+
+  double _calculateDistanceWithBranch({
+    required double lat1,
+    required double lon1,
+    required double lat2,
+    required double lon2,
+  }) {
+    var p = 0.017453292519943295;
+    var c = cos;
+    var a = 0.5 - c((lat2 - lat1) * p) / 2 + c(lat1 * p) * c(lat2 * p) * (1 - c((lon2 - lon1) * p)) / 2;
+    return 12742 * asin(sqrt(a));
+  }
 }

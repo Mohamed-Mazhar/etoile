@@ -19,10 +19,7 @@ class DioClient {
         required this.sharedPreferences,
       }) {
     token = sharedPreferences.getString(AppConstants.token) ?? '';
-
     updateHeader(dioC: dioC);
-
-
   }
 
   Future<void> updateHeader({String? getToken, Dio? dioC})async {
@@ -44,8 +41,6 @@ class DioClient {
     dio?.interceptors.add(loggingInterceptor);
   }
 
-
-
   Future<Response> get(String uri, {
     Map<String, dynamic>? queryParameters,
     CancelToken? cancelToken,
@@ -59,6 +54,7 @@ class DioClient {
         cancelToken: cancelToken,
         onReceiveProgress: onReceiveProgress,
       );
+      debugPrint('apiResponse ==> url => $uri \n Response ==> $response');
       return response;
     } on SocketException catch (e) {
       throw SocketException(e.toString());

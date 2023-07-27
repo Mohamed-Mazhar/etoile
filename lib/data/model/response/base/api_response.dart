@@ -6,7 +6,8 @@ class ApiResponse {
 
   ApiResponse(this.response, this.error);
 
-  ApiResponse.withError(dynamic errorValue) : response = null,
+  ApiResponse.withError(dynamic errorValue)
+      : response = null,
         error = errorValue;
 
   ApiResponse.withSuccess(Response responseValue)

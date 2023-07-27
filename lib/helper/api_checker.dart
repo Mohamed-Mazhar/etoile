@@ -11,28 +11,28 @@ class ApiChecker {
   static void checkApi(ApiResponse apiResponse) {
     ErrorResponse error = getError(apiResponse);
 //config-missing
-    if( error.errors![0].code == '401' || error.errors![0].code == 'auth-001'
-        && ModalRoute.of(Get.context!)?.settings.name != Routes.getLoginRoute()) {
+    if (error.errors![0].code == '401' ||
+        error.errors![0].code == 'auth-001' &&
+            ModalRoute.of(Get.context!)?.settings.name != Routes.getLoginRoute()) {
       Provider.of<SplashProvider>(Get.context!, listen: false).removeSharedData();
 
-      if( ModalRoute.of(Get.context!)!.settings.name != Routes.getLoginRoute()) {
+      if (ModalRoute.of(Get.context!)!.settings.name != Routes.getLoginRoute()) {
         Navigator.pushNamedAndRemoveUntil(Get.context!, Routes.getLoginRoute(), (route) => false);
       }
-    }else {
+    } else {
       showCustomSnackBar(error.errors![0].message);
     }
   }
 
-  static ErrorResponse getError(ApiResponse apiResponse){
+  static ErrorResponse getError(ApiResponse apiResponse) {
     ErrorResponse error;
 
-    try{
+    try {
       error = ErrorResponse.fromJson(apiResponse);
-    }catch(e){
-      if(apiResponse.error is String){
+    } catch (e) {
+      if (apiResponse.error is String) {
         error = ErrorResponse(errors: [Errors(code: '', message: apiResponse.error.toString())]);
-
-      }else{
+      } else {
         error = ErrorResponse.fromJson(apiResponse.error);
       }
     }

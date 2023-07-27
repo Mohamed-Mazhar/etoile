@@ -19,18 +19,41 @@ class LocationProvider with ChangeNotifier {
   final SharedPreferences? sharedPreferences;
   final LocationRepo? locationRepo;
 
-  LocationProvider({required this.sharedPreferences, this.locationRepo});
+  LocationProvider({
+    required this.sharedPreferences,
+    this.locationRepo,
+  });
 
-  Position _position = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
-  Position _pickPosition = Position(longitude: 0, latitude: 0, timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1);
+  Position _position = Position(
+      longitude: 0,
+      latitude: 0,
+      timestamp: DateTime.now(),
+      accuracy: 1,
+      altitude: 1,
+      heading: 1,
+      speed: 1,
+      speedAccuracy: 1);
+  Position _pickPosition = Position(
+      longitude: 0,
+      latitude: 0,
+      timestamp: DateTime.now(),
+      accuracy: 1,
+      altitude: 1,
+      heading: 1,
+      speed: 1,
+      speedAccuracy: 1);
   bool _loading = false;
+
   bool get loading => _loading;
+
   Position get position => _position;
+
   Position get pickPosition => _pickPosition;
   String? _address = '';
   String? _pickAddress = '';
 
   String? get address => _address;
+
   String? get pickAddress => _pickAddress;
   final List<Marker> _markers = <Marker>[];
 
@@ -43,40 +66,52 @@ class LocationProvider with ChangeNotifier {
   bool _updateAddAddressData = true;
 
   bool get buttonDisabled => _buttonDisabled;
+
   GoogleMapController? get mapController => _mapController;
 
-  updateAddressStatusMessage({String? message}){
+  updateAddressStatusMessage({String? message}) {
     _addressStatusMessage = message;
   }
 
-  void checkPermission(Function callback, BuildContext context) async {
+  void checkPermission(Function(LocationPermission permission) callback, BuildContext context) async {
     LocationPermission permission = await Geolocator.requestPermission();
-    if(permission == LocationPermission.denied) {
+    if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
-    }else if(permission == LocationPermission.deniedForever) {
-      showDialog(context: Get.context!, barrierDismissible: false, builder: (context) => const PermissionDialog());
-    }else {
-      callback();
+    } else if (permission == LocationPermission.deniedForever) {
+      showDialog(
+        context: Get.context!,
+        barrierDismissible: false,
+        builder: (context) => const PermissionDialog(),
+      );
     }
+    callback(permission);
   }
 
-
   // for get current location
-  Future<Position> getCurrentLocation(BuildContext context, bool isUpdate, {GoogleMapController? mapController}) async {
+  Future<Position> getCurrentLocation(
+    BuildContext context,
+    bool isUpdate, {
+    GoogleMapController? mapController,
+  }) async {
     _loading = true;
-   if(isUpdate) {
-     notifyListeners();
-   }
+    if (isUpdate) {
+      notifyListeners();
+    }
 
     Position myPosition;
     try {
       Position newLocalData = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
       myPosition = newLocalData;
-    }catch(e) {
+    } catch (e) {
       myPosition = Position(
         latitude: double.parse('0'),
         longitude: double.parse('0'),
-        timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1,
+        timestamp: DateTime.now(),
+        accuracy: 1,
+        altitude: 1,
+        heading: 1,
+        speed: 1,
+        speedAccuracy: 1,
       );
     }
     _position = myPosition;
@@ -87,7 +122,12 @@ class LocationProvider with ChangeNotifier {
       ));
     }
     // String _myPlaceMark;
-    _address = await getAddressFromGeocode(LatLng(myPosition.latitude, myPosition.longitude));
+    try {
+      _address = await getAddressFromGeocode(LatLng(myPosition.latitude, myPosition.longitude));
+      debugPrint("Data returned from location provider $_position \n with address $_address");
+    } catch (e) {
+      debugPrint("Exception caught while retrieving address from getAddressFromGeocode $e");
+    }
 
     _loading = false;
     notifyListeners();
@@ -95,24 +135,43 @@ class LocationProvider with ChangeNotifier {
   }
 
   // update Position
-  void updatePosition(CameraPosition? position, bool fromAddress, String? address, BuildContext context, bool forceNotify) async {
-    if(_updateAddAddressData || forceNotify) {
+  void updatePosition(
+    CameraPosition? position,
+    bool fromAddress,
+    String? address,
+    BuildContext context,
+    bool forceNotify,
+  ) async {
+    if (_updateAddAddressData || forceNotify) {
       _loading = true;
       notifyListeners();
       try {
         if (fromAddress) {
           _position = Position(
-            latitude: position!.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
-            heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1,
+            latitude: position!.target.latitude,
+            longitude: position.target.longitude,
+            timestamp: DateTime.now(),
+            heading: 1,
+            accuracy: 1,
+            altitude: 1,
+            speedAccuracy: 1,
+            speed: 1,
           );
         } else {
           _pickPosition = Position(
-            latitude: position!.target.latitude, longitude: position.target.longitude, timestamp: DateTime.now(),
-            heading: 1, accuracy: 1, altitude: 1, speedAccuracy: 1, speed: 1,
+            latitude: position!.target.latitude,
+            longitude: position.target.longitude,
+            timestamp: DateTime.now(),
+            heading: 1,
+            accuracy: 1,
+            altitude: 1,
+            speedAccuracy: 1,
+            speed: 1,
           );
         }
         if (_changeAddress) {
-          String addressFromGeocode = await getAddressFromGeocode(LatLng(position.target.latitude, position.target.longitude));
+          String addressFromGeocode =
+              await getAddressFromGeocode(LatLng(position.target.latitude, position.target.longitude));
           fromAddress ? _address = addressFromGeocode : _pickAddress = addressFromGeocode;
         } else {
           _changeAddress = true;
@@ -122,7 +181,7 @@ class LocationProvider with ChangeNotifier {
       }
       _loading = false;
       notifyListeners();
-    }else {
+    } else {
       _updateAddAddressData = true;
     }
   }
@@ -134,7 +193,7 @@ class LocationProvider with ChangeNotifier {
       _addressList!.removeAt(index);
       callback(true, 'Deleted address successfully');
     } else {
-      callback(false, ApiChecker.getError(apiResponse).errors![0].message);
+      callback(false, ApiChecker.getError(apiResponse).errors?[0].message);
     }
     notifyListeners();
   }
@@ -166,11 +225,13 @@ class LocationProvider with ChangeNotifier {
 
   bool get isLoading => _isLoading;
   String? _errorMessage = '';
+
   String? get errorMessage => _errorMessage;
   String? _addressStatusMessage = '';
+
   String? get addressStatusMessage => _addressStatusMessage;
 
-  updateErrorMessage({String? message}){
+  updateErrorMessage({String? message}) {
     _errorMessage = message;
   }
 
@@ -189,7 +250,7 @@ class LocationProvider with ChangeNotifier {
       responseModel = ResponseModel(true, message);
       _addressStatusMessage = message;
     } else {
-      _errorMessage = ApiChecker.getError(apiResponse).errors![0].message;
+      _errorMessage = ApiChecker.getError(apiResponse)?.errors?[0].message;
       responseModel = ResponseModel(false, _errorMessage);
     }
     notifyListeners();
@@ -197,7 +258,8 @@ class LocationProvider with ChangeNotifier {
   }
 
   // for address update screen
-  Future<ResponseModel> updateAddress(BuildContext context, {required AddressModel addressModel, int? addressId}) async {
+  Future<ResponseModel> updateAddress(BuildContext context,
+      {required AddressModel addressModel, int? addressId}) async {
     _isLoading = true;
     notifyListeners();
     _errorMessage = '';
@@ -212,8 +274,7 @@ class LocationProvider with ChangeNotifier {
       responseModel = ResponseModel(true, message);
       _addressStatusMessage = message;
     } else {
-
-      _errorMessage = ApiChecker.getError(apiResponse).errors![0].message;
+      _errorMessage = ApiChecker.getError(apiResponse)?.errors?[0].message;
       responseModel = ResponseModel(false, _errorMessage);
     }
     notifyListeners();
@@ -244,7 +305,7 @@ class LocationProvider with ChangeNotifier {
 
   updateAddressIndex(int index, bool notify) {
     _selectAddressIndex = index;
-    if(notify) {
+    if (notify) {
       notifyListeners();
     }
   }
@@ -264,18 +325,27 @@ class LocationProvider with ChangeNotifier {
     detail = PlacesDetailsResponse.fromJson(response.response!.data);
 
     _pickPosition = Position(
-      longitude: detail.result.geometry!.location.lat, latitude: detail.result.geometry!.location.lng,
-      timestamp: DateTime.now(), accuracy: 1, altitude: 1, heading: 1, speed: 1, speedAccuracy: 1,
+      longitude: detail.result.geometry!.location.lat,
+      latitude: detail.result.geometry!.location.lng,
+      timestamp: DateTime.now(),
+      accuracy: 1,
+      altitude: 1,
+      heading: 1,
+      speed: 1,
+      speedAccuracy: 1,
     );
 
     // _pickAddress = Placemark(name: address);
-     _pickAddress = address;
+    _pickAddress = address;
     _changeAddress = false;
 
-    if(mapController != null) {
-      mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(target: LatLng(
-        detail.result.geometry!.location.lat, detail.result.geometry!.location.lng,
-      ), zoom: 16)));
+    if (mapController != null) {
+      mapController.animateCamera(CameraUpdate.newCameraPosition(CameraPosition(
+          target: LatLng(
+            detail.result.geometry!.location.lat,
+            detail.result.geometry!.location.lng,
+          ),
+          zoom: 16)));
     }
     _loading = false;
     notifyListeners();
@@ -307,20 +377,21 @@ class LocationProvider with ChangeNotifier {
   Future<String> getAddressFromGeocode(LatLng latLng) async {
     ApiResponse response = await locationRepo!.getAddressFromGeocode(latLng);
     String address = 'Unknown Location Found';
-    if(response.response?.statusCode == 200 && response.response!.data['status'] == 'OK') {
+    if (response.response?.statusCode == 200 && response.response!.data['status'] == 'OK') {
       address = response.response!.data['results'][0]['formatted_address'].toString();
-    }else {
+    } else {
       ApiChecker.checkApi(response);
     }
     return address;
   }
 
   Future<List<Prediction>> searchLocation(BuildContext context, String text) async {
-    if(text.isNotEmpty) {
+    if (text.isNotEmpty) {
       ApiResponse response = await locationRepo!.searchLocation(text);
       if (response.response!.statusCode == 200 && response.response!.data['status'] == 'OK') {
         _predictionList = [];
-        response.response!.data['predictions'].forEach((prediction) => _predictionList.add(Prediction.fromJson(prediction)));
+        response.response!.data['predictions']
+            .forEach((prediction) => _predictionList.add(Prediction.fromJson(prediction)));
       } else {
         ApiChecker.checkApi(response);
       }
@@ -330,13 +401,11 @@ class LocationProvider with ChangeNotifier {
 
   Future<LatLng?> getCurrentLatLong() async {
     Position? position;
-    try{
+    try {
       position = await Geolocator.getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
-    }catch(e) {
+    } catch (e) {
       debugPrint('error : $e');
     }
-    return position != null ?  LatLng(position.latitude, position.longitude) : null;
+    return position != null ? LatLng(position.latitude, position.longitude) : null;
   }
-
-
 }
