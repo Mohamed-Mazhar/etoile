@@ -42,7 +42,6 @@ class SplashProvider extends ChangeNotifier {
     bool isSuccess;
     if (apiResponse.response != null && apiResponse.response!.statusCode == 200) {
       _configModel = ConfigModel.fromJson(apiResponse.response!.data);
-      debugPrint("Configuration retrieved ${_configModel?.branches}");
       _baseUrls = ConfigModel.fromJson(apiResponse.response!.data).baseUrls;
       isSuccess = true;
 
@@ -158,9 +157,12 @@ class SplashProvider extends ChangeNotifier {
 
   Future<void> setDefaultBranch({required List<Branches?>? branches}) async {
     if (branches != null) {
-      final defaultBranch = branches.first;
+      final defaultBranch = branches.firstWhere(
+        (branch) => branch?.id == AppConstants.defaultBranchId,
+        orElse: () => null
+      );
       if (defaultBranch != null) {
-        splashRepo?.setBranchId(defaultBranch.id!);
+        splashRepo?.setBranchId(AppConstants.defaultBranchId);
         notifyListeners();
       }
     }
@@ -180,13 +182,14 @@ class SplashProvider extends ChangeNotifier {
           lat2: currentUserLocation.latitude,
           lon2: currentUserLocation.longitude,
         );
-        if (distance < shortestDistance) {
+        debugPrint("Branch coverage is ${branch.coverage} and distance is $distance");
+        if (distance < shortestDistance && (branch.coverage! / 1000) >= distance) {
           shortestDistance = distance;
           nearestBranchId = branch.id!;
         }
       }
     }
-    await splashRepo!.setBranchId(nearestBranchId);
+    await splashRepo!.setBranchId(nearestBranchId != 0 ? nearestBranchId : AppConstants.defaultBranchId);
     notifyListeners();
   }
 

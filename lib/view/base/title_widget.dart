@@ -14,16 +14,21 @@ class TitleWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
       Text(title!, style: rubikMedium),
-      onTap != null && !ResponsiveHelper.isDesktop(context)? InkWell(
-        onTap: onTap as void Function()?,
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
-          child: Text(
-            getTranslated('view_all', context)!,
-            style: rubikRegular.copyWith(fontSize: Dimensions.fontSizeSmall, color: Theme.of(context).primaryColor),
-          ),
-        ),
-      ) : const SizedBox(),
+      onTap != null && !ResponsiveHelper.isDesktop(context)
+          ? InkWell(
+              onTap: onTap as void Function()?,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
+                child: Text(
+                  getTranslated('view_all', context)!,
+                  style: rubikRegular.copyWith(
+                    fontSize: Dimensions.fontSizeSmall,
+                    color: Theme.of(context).primaryColor,
+                  ),
+                ),
+              ),
+            )
+          : const SizedBox(),
     ]);
   }
 }
