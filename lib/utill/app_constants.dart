@@ -68,7 +68,7 @@ class AppConstants {
   static const String walletTransactionUrl = '/api/v1/customer/wallet-transactions';
   static const String loyaltyTransactionUrl = '/api/v1/customer/loyalty-point-transactions';
   static const String loyaltyPointTransferUrl = '/api/v1/customer/transfer-point-to-wallet';
-  static const int defaultBranchId = 11;
+  static const int defaultBranchId = 1;
 
 
 
